@@ -4,7 +4,6 @@
 	{
 		IReadOnlyDictionary<string, Type> SupportedParameters { get; }
 
-		// More specific return type than just string
 		Task<AIPluginResult> ExecuteAsync(IReadOnlyDictionary<string, object> parameters);
 	}
 
@@ -15,7 +14,6 @@
 		public object Data { get; }
 		public Exception Error { get; }
 
-		// Constructor for success
 		public AIPluginResult(object data, string message = null)
 		{
 			Success = true;
@@ -23,7 +21,6 @@
 			Message = message;
 		}
 
-		// Constructor for failure
 		public AIPluginResult(Exception error, string message)
 		{
 			Success = false;
