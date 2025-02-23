@@ -46,6 +46,17 @@
       <PackageReference Include="System.Text.Json" Version="8.0.0" />
     </DependencyGroup>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="icon.png">
+      <Pack>true</Pack>
+      <PackagePath>\</PackagePath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Visible>true</Visible>
+    </None>
+    <!-- Configure README -->
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
   
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.2" />
