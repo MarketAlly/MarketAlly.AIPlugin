@@ -6,6 +6,47 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>MarketAlly.AIPlugin</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>David H Friedel Jr</Authors>
+    <Company>MarketAlly</Company>
+    <Product>MarketAlly.AIPlugin</Product>
+    <Title>MarketAlly AI Plugin Framework</Title>
+    <Description>
+      A flexible .NET plugin framework for AI model function calling and tool integration. Supports multiple AI models including OpenAI, Claude, Qwen, Mistral, and Gemini. Features include:
+
+      - Declarative plugin registration using attributes
+      - Automatic schema generation for different AI model formats
+      - Type-safe parameter validation
+      - Built-in plugin registry and execution system
+      - Extensible plugin architecture with async support
+      - Comprehensive error handling and logging
+    </Description>
+    <Copyright>Copyright © 2025 MarketAlly</Copyright>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/MarketAlly/MarketAlly.AIPlugin</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/MarketAlly/MarketAlly.AIPlugin</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>ai plugin llm openai claude anthropic mistral gemini function-calling tools automation</PackageTags>
+    <PackageReleaseNotes>
+      Initial release:
+      - Core plugin framework implementation
+      - Support for multiple AI model schemas
+      - Built-in plugins for common operations
+      - Attribute-based plugin registration
+      - Async execution support
+      - Comprehensive parameter validation
+    </PackageReleaseNotes>
+    <DependencyGroup>
+      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+      <PackageReference Include="System.Text.Json" Version="8.0.0" />
+    </DependencyGroup>
+  </PropertyGroup>
+  
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.2" />
   </ItemGroup>
