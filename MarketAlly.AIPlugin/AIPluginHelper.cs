@@ -69,7 +69,14 @@ namespace MarketAlly.AIPlugin
 		{
 			return modelType switch
 			{
-				AIModel.OpenAI => new { functions = schemaList },
+				AIModel.OpenAI => new
+				{
+					tools = schemaList.Select(schema => new
+					{
+						type = "function",
+						function = schema
+					}).ToList()
+				},
 				AIModel.Claude => new { tools = schemaList },
 				AIModel.Qwen => new { apis = schemaList },
 				AIModel.Mistral => new { tools = schemaList }, // Mimics Claude's format
