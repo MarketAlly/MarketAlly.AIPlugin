@@ -25,6 +25,7 @@ namespace MarketAlly.AIPlugin
 			_logger = logger;
 		}
 
+
 		public IReadOnlyDictionary<string, PluginInfo> GetAvailableFunctions()
 		{
 			var pluginInfo = new Dictionary<string, PluginInfo>();
@@ -56,6 +57,16 @@ namespace MarketAlly.AIPlugin
 			}
 
 			return pluginInfo;
+		}
+
+		public List<IAIPlugin> GetAllPlugins()
+		{
+			return _plugins.Select(x => x.Value).ToList();
+		}
+
+		public List<FunctionDefinition> GetAllPluginSchemas()
+		{
+			return AIPluginSchemaConverter.ConvertPluginsToFunctionDefinitions(_plugins.Select(x => x.Value).ToList());
 		}
 
 		public void RegisterPlugin(IAIPlugin plugin)
