@@ -10,6 +10,7 @@ A flexible .NET plugin framework for AI model function calling and tool integrat
 - 📝 Built-in plugin registry and execution system
 - 🔄 Extensible plugin architecture with async support
 - 🛡️ Comprehensive error handling and logging
+- 🤖 Model-specific request formatting for major AI providers
 
 ## Installation
 
@@ -90,7 +91,43 @@ string openAiSchema = AIPluginHelper.GenerateSchema(AIPluginHelper.AIModel.OpenA
 string claudeSchema = AIPluginHelper.GenerateSchema(AIPluginHelper.AIModel.Claude);
 ```
 
-### 4. Execute Plugins
+### 4. Prepare API Requests with Tools
+
+You can easily prepare API requests for different AI providers using the helper methods:
+
+```csharp
+// Your messages
+var messages = new List<ChatMessage> 
+{ 
+    new ChatMessage { Role = "system", Content = "You are a helpful assistant." },
+    new ChatMessage { Role = "user", Content = "Calculate 25 * 48" } 
+};
+
+// Get function definitions from the registry
+var functionDefinitions = registry.GetAllPluginSchemas();
+
+// For OpenAI
+var openAiRequest = AIPluginHelper.SerializeRequestWithTools(
+    AIPluginHelper.AIModel.OpenAI,  
+    messages, 
+    functionDefinitions, 
+    "gpt-4",
+    temperature: 0.7,
+    maxTokens: 1024
+);
+
+// For Claude (handles system message and input_schema correctly)
+var claudeRequest = AIPluginHelper.SerializeRequestWithTools(
+    AIPluginHelper.AIModel.Claude,  
+    messages, 
+    functionDefinitions, 
+    "claude-3-opus-20240229",
+    temperature: 0.7,
+    maxTokens: 4096
+);
+```
+
+### 5. Execute Plugins
 
 Execute plugin functions:
 
@@ -160,12 +197,36 @@ return new AIPluginResult(exception, "Operation failed");
 
 ## AI Model Support
 
-The framework supports schema generation for:
-- OpenAI (functions format)
-- Claude (tools format)
-- Qwen (apis format)
-- Mistral (tools format)
-- Gemini (functions format)
+The framework supports the following AI models:
+- **OpenAI**: Full support for function calling and tools
+- **Claude**: Handles the unique system message and input_schema requirements
+- **Qwen**: Supports the Qwen API format
+- **Mistral**: Compatible with Mistral's tools implementation
+- **Gemini**: Supports Google's Gemini model format
+
+Each model has its own format requirements, which are automatically handled by the `SerializeRequestWithTools` method.
+
+## Model-Specific Request Formatting
+
+The framework handles provider-specific formatting requirements:
+
+```csharp
+// The helper handles differences between providers automatically
+AIPluginHelper.PrepareRequestWithTools(
+    modelType,       // AI model type (OpenAI, Claude, etc.)
+    messages,        // Your chat messages
+    functionDefs,    // Function definitions from your registry
+    modelName,       // Model name (e.g., "gpt-4", "claude-3-opus")
+    temperature,     // Temperature setting
+    maxTokens        // Max tokens for response
+);
+```
+
+Key differences that are automatically handled:
+- **OpenAI/Gemini**: Uses `tools` array with `type: "function"` wrapper
+- **Claude**: Places system messages in a separate field and uses `input_schema`
+- **Mistral**: Follows a similar format to Claude with minor differences
+- **Qwen**: Uses `apis` instead of `tools` for function definitions
 
 ## Dependency Injection
 

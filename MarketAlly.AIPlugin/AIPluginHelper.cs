@@ -96,5 +96,172 @@ namespace MarketAlly.AIPlugin
 			if (type == typeof(DateTime)) return "string";
 			return "string"; // Default to string for unknown types
 		}
+
+		/// <summary>
+		/// Maps the standard message role to the provider-specific role
+		/// </summary>
+		private static string MapRole(AIModel modelType, string role)
+		{
+			// Claude has specific role naming requirements
+			if (modelType == AIModel.Claude && role == "assistant")
+				return "assistant";
+
+			// Default mapping (works for most providers)
+			return role.ToLower();
+		}
+
+		/// <summary>
+		/// Prepares a request dictionary with tools/functions based on AI model type
+		/// </summary>
+		/// <param name="modelType">The AI model type to prepare for</param>
+		/// <param name="messages">The messages to be included in the request</param>
+		/// <param name="functionDefinitions">The function definitions to include</param>
+		/// <param name="defaultModel">The model name to use</param>
+		/// <param name="temperature">Temperature setting for generation</param>
+		/// <param name="maxTokens">Maximum tokens for the response</param>
+		/// <param name="toolChoice">The tool choice setting (auto, none, or specific function name)</param>
+		/// <returns>The prepared request dictionary</returns>
+		public static Dictionary<string, object> PrepareRequestWithTools(
+			AIModel modelType,
+			IEnumerable<dynamic> messages,
+			List<FunctionDefinition> functionDefinitions,
+			string defaultModel,
+			double temperature = 0.7,
+			int? maxTokens = null,
+			string toolChoice = "auto")
+		{
+			var result = new Dictionary<string, object>();
+
+			// Set the model name
+			result["model"] = defaultModel;
+
+			// Set temperature
+			result["temperature"] = temperature;
+
+			// Set max tokens if provided
+			if (maxTokens.HasValue)
+			{
+				result["max_tokens"] = maxTokens.Value;
+			}
+
+			// Handle messages based on model type
+			switch (modelType)
+			{
+				case AIModel.Claude:
+					// Claude handles system messages separately
+					var systemMessage = messages.FirstOrDefault(m => m.Role?.ToString().ToLower() == "system")?.Content;
+					var filteredMessages = messages
+						.Where(m => m.Role?.ToString().ToLower() != "system")
+						.Select(m => new {
+							role = MapRole(modelType, m.Role?.ToString()),
+							content = m.Content
+						})
+						.ToList();
+
+					result["messages"] = filteredMessages;
+
+					if (systemMessage != null)
+					{
+						result["system"] = systemMessage;
+					}
+					break;
+
+				default:
+					// Standard message handling for other models
+					result["messages"] = messages.Select(m => new {
+						role = MapRole(modelType, m.Role?.ToString()),
+						content = m.Content
+					}).ToList();
+					break;
+			}
+
+			// Add tools/functions if provided
+			if (functionDefinitions != null && functionDefinitions.Count > 0)
+			{
+				switch (modelType)
+				{
+					case AIModel.OpenAI:
+					case AIModel.Gemini:
+						result["tools"] = functionDefinitions.Select(fd => new
+						{
+							type = "function",
+							function = new
+							{
+								name = fd.Name,
+								description = fd.Description,
+								parameters = fd.Parameters
+							}
+						}).ToList();
+						result["tool_choice"] = toolChoice;
+						break;
+
+					case AIModel.Claude:
+						result["tools"] = functionDefinitions.Select(fd => new
+						{
+							name = fd.Name,
+							description = fd.Description,
+							input_schema = fd.Parameters  // Claude uses input_schema instead of parameters
+						}).ToList();
+						result["tool_choice"] = toolChoice;
+						break;
+
+					case AIModel.Mistral:
+						result["tools"] = functionDefinitions.Select(fd => new
+						{
+							name = fd.Name,
+							description = fd.Description,
+							parameters = fd.Parameters
+						}).ToList();
+						result["tool_choice"] = toolChoice;
+						break;
+
+					case AIModel.Qwen:
+						result["apis"] = functionDefinitions.Select(fd => new
+						{
+							name = fd.Name,
+							description = fd.Description,
+							parameters = fd.Parameters
+						}).ToList();
+						result["api_choice"] = toolChoice;
+						break;
+				}
+			}
+
+			return result;
+		}
+
+		/// <summary>
+		/// Serializes a request with tools/functions to JSON for AI model consumption
+		/// </summary>
+		/// <param name="modelType">The AI model type to prepare for</param>
+		/// <param name="messages">The messages to be included in the request</param>
+		/// <param name="functionDefinitions">The function definitions to include</param>
+		/// <param name="defaultModel">The model name to use</param>
+		/// <param name="temperature">Temperature setting for generation</param>
+		/// <param name="maxTokens">Maximum tokens for the response</param>
+		/// <param name="toolChoice">The tool choice setting (auto, none, or specific function name)</param>
+		/// <param name="options">Optional JsonSerializerOptions for serialization</param>
+		/// <returns>A JSON string representation of the request</returns>
+		public static string SerializeRequestWithTools(
+			AIModel modelType,
+			IEnumerable<dynamic> messages,
+			List<FunctionDefinition> functionDefinitions,
+			string defaultModel,
+			double temperature = 0.7,
+			int? maxTokens = null,
+			string toolChoice = "auto",
+			JsonSerializerOptions options = null)
+		{
+			var requestObj = PrepareRequestWithTools(
+				modelType,
+				messages,
+				functionDefinitions,
+				defaultModel,
+				temperature,
+				maxTokens,
+				toolChoice);
+
+			return JsonSerializer.Serialize(requestObj, options ?? new JsonSerializerOptions { WriteIndented = true });
+		}
 	}
 }
