@@ -1,4 +1,4 @@
-﻿# WebSearch Plugin for MarketAlly.AIPlugin
+﻿# WebSearch Plugin for MarketAlly AI Plugin Toolkit
 
 A flexible and extensible plugin for performing web searches through various search engines, designed to integrate seamlessly with the MarketAlly.AIPlugin framework.
 

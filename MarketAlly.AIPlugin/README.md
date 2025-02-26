@@ -1,4 +1,4 @@
-﻿# MarketAlly.AIPlugin
+﻿# MarketAlly AI Plugin Toolkit
 
 A flexible .NET plugin framework for AI model function calling and tool integration. This framework provides a unified way to create and manage plugins that can be used with various AI models including OpenAI, Claude, Qwen, Mistral, and Gemini.
 

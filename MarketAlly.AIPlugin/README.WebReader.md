@@ -1,4 +1,4 @@
-﻿# WebReader Plugin for MarketAlly.AIPlugin
+﻿# WebReader Plugin for MarketAlly AI Plugin Toolkit
 
 A flexible plugin for reading and extracting content from web pages, designed to work with the MarketAlly.AIPlugin framework.
 
