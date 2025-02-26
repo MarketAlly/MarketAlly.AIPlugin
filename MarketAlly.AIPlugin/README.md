@@ -1,6 +1,6 @@
 ﻿# MarketAlly AI Plugin Toolkit
 
-A flexible .NET plugin framework for AI model function calling and tool integration. This framework provides a unified way to create and manage plugins that can be used with various AI models including OpenAI, Claude, Qwen, Mistral, and Gemini.
+A flexible .NET plugin toolkit for AI model function calling and tool integration. This toolkit provides a unified way to create and manage plugins that can be used with various AI models including OpenAI, Claude, Qwen, Mistral, and Gemini.
 
 ## Features
 
@@ -152,7 +152,7 @@ else
 
 ## Built-in Plugins
 
-The framework comes with several built-in plugins:
+The toolkit comes with several built-in plugins:
 
 - **StringManipulator**: Performs string operations (reverse, uppercase, lowercase, trim)
 - **SystemInfo**: Retrieves current system information
@@ -178,7 +178,7 @@ The framework comes with several built-in plugins:
 
 ### Parameter Validation
 
-The framework automatically validates:
+The toolkit automatically validates:
 - Required parameters
 - Parameter types
 - Parameter presence
@@ -197,7 +197,7 @@ return new AIPluginResult(exception, "Operation failed");
 
 ## AI Model Support
 
-The framework supports the following AI models:
+The toolkit supports the following AI models:
 - **OpenAI**: Full support for function calling and tools
 - **Claude**: Handles the unique system message and input_schema requirements
 - **Qwen**: Supports the Qwen API format
@@ -208,7 +208,7 @@ Each model has its own format requirements, which are automatically handled by t
 
 ## Model-Specific Request Formatting
 
-The framework handles provider-specific formatting requirements:
+The toolkit handles provider-specific formatting requirements:
 
 ```csharp
 // The helper handles differences between providers automatically
@@ -230,7 +230,7 @@ Key differences that are automatically handled:
 
 ## Dependency Injection
 
-The framework supports dependency injection through the `AIPluginRegistry`:
+The toolkit supports dependency injection through the `AIPluginRegistry`:
 
 ```csharp
 services.AddSingleton<AIPluginRegistry>();
@@ -239,7 +239,7 @@ services.AddTransient<CalculatorPlugin>();
 
 ## Logging
 
-The framework uses `Microsoft.Extensions.Logging` for comprehensive logging:
+The toolkit uses `Microsoft.Extensions.Logging` for comprehensive logging:
 
 ```csharp
 services.AddLogging(builder =>
