@@ -177,6 +177,105 @@ namespace MarketAlly.AIPlugin
 					return null;
 			}
 		}
+
+		/// <summary>
+		/// Get the JSON schema for a specific property, with enhanced handling for known types
+		/// </summary>
+		private static JsonObject GetPropertyJsonSchema(PropertyInfo prop, AIParameterAttribute paramAttr, object defaultValue)
+		{
+			var paramSchema = new JsonObject
+			{
+				["type"] = GetJsonSchemaType(prop.PropertyType),
+				["description"] = paramAttr.Description
+			};
+
+			// Add default value if property has one and it's not the default for its type
+			if (defaultValue != null && !IsDefaultValue(defaultValue, prop.PropertyType))
+			{
+				paramSchema["default"] = JsonSerializer.SerializeToNode(defaultValue);
+			}
+
+			// Apply schema enhancements for special types
+			var enhancedSchema = paramSchema.EnhanceJsonSchema(prop.PropertyType, prop);
+
+			return enhancedSchema;
+		}
+
+		// This method would replace or be called from within the ConvertPluginsToFunctionDefinitions method
+		private static void AddParameterToSchema(JsonObject properties, PropertyInfo prop, AIParameterAttribute paramAttr, object defaultValue, JsonArray requiredArray)
+		{
+			// Get enhanced schema for this property
+			var paramSchema = GetPropertyJsonSchema(prop, paramAttr, defaultValue);
+
+			// Use parameter name from supported parameters if available
+			string paramName = prop.Name.ToLowerInvariant();
+
+			// Add to properties object
+			properties[paramName] = paramSchema;
+
+			// Add to required array if required
+			if (paramAttr.Required)
+			{
+				requiredArray.Add(paramName);
+			}
+		}
+
+		/// <summary>
+		/// Converts a list of IAIPlugin instances to FunctionDefinition objects with enhanced schema
+		/// </summary>
+		public static List<FunctionDefinition> ConvertPluginsToFunctionDefinitionsEnhanced(IEnumerable<IAIPlugin> plugins)
+		{
+			var functionDefinitions = new List<FunctionDefinition>();
+
+			foreach (var plugin in plugins)
+			{
+				// Get plugin attributes using reflection
+				var pluginType = plugin.GetType();
+				var pluginAttribute = pluginType.GetCustomAttribute<AIPluginAttribute>();
+
+				if (pluginAttribute == null)
+					continue;
+
+				// Create parameter schema
+				var parameters = new JsonObject
+				{
+					["type"] = "object",
+					["properties"] = new JsonObject(),
+					["required"] = new JsonArray()
+				};
+
+				// Get all properties with AIParameter attribute
+				var parameterProperties = pluginType.GetProperties()
+					.Where(p => p.GetCustomAttribute<AIParameterAttribute>() != null)
+					.ToList();
+
+				foreach (var prop in parameterProperties)
+				{
+					var paramAttr = prop.GetCustomAttribute<AIParameterAttribute>();
+					var defaultValue = prop.GetValue(plugin);
+
+					// Add parameter with enhanced schema
+					AddParameterToSchema(
+						(JsonObject)parameters["properties"],
+						prop,
+						paramAttr,
+						defaultValue,
+						(JsonArray)parameters["required"]
+					);
+				}
+
+				// Create function definition
+				functionDefinitions.Add(new FunctionDefinition
+				{
+					Name = pluginAttribute.Name,
+					Description = pluginAttribute.Description,
+					Parameters = parameters
+				});
+			}
+
+			return functionDefinitions;
+		}
+
 	}
 
 	public class FunctionDefinition
